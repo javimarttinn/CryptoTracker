@@ -8,54 +8,47 @@
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+
+struct CryptoListView: View {
+    @StateObject private var viewModel = CryptoListViewModel()
+    @State private var selectedCurrency = "usd"
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        NavigationView {
+            VStack {
+                // Selector de moneda (USD / EUR)
+                Picker("Currency", selection: $selectedCurrency) {
+                    Text("USD").tag("usd")
+                    Text("EUR").tag("eur")
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding()
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+                // Lista de criptomonedas
+                List(viewModel.cryptocurrencies) { crypto in
+                    CryptoRowView(crypto: crypto)
+                }
+                .listStyle(PlainListStyle())
+                .onAppear {
+                    viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
+                }
+                .onChange(of: selectedCurrency) {
+                    viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
+                }
+            }
+            .navigationTitle("Top 10 Cryptos")
+            .alert(item: $viewModel.errorMessage) { errorMessage in
+                Alert(
+                    title: Text("Error"),
+                    message: Text(errorMessage.message),
+                    dismissButton: .default(Text("OK"))
+                )
             }
         }
     }
 }
 
 #Preview {
-    ContentView()
+    CryptoListView()
         .modelContainer(for: Item.self, inMemory: true)
 }

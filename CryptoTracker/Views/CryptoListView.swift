@@ -11,21 +11,63 @@ import SwiftData
 struct CryptoListView: View {
     @StateObject private var viewModel = CryptoListViewModel()
     @State private var selectedCurrency = "eur"
-    @State private var selectedCrypto: Cryptocurrency?// Guarda la criptomoneda seleccionada
-    @State private var showDetail = false // Controla la navegación a la vista de detalle
+    @State private var selectedCrypto: Cryptocurrency?
+    @State private var showDetail = false
+    @State private var showFavorites = false // Controla la navegación a la vista de favoritos
+    
 
     var body: some View {
         NavigationView {
             VStack {
-                // Selector de moneda (USD / EUR)
-                Picker("Currency", selection: $selectedCurrency) {
-                    Text("USD").tag("usd")
-                    Text("EUR").tag("eur")
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
+                // 🔹 Selector de moneda (EUR / USD) con botones
+                HStack(spacing: 16) {
+                    Button(action: {
+                        selectedCurrency = "eur"
+                        viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
+                    }) {
+                        Text("EUR")
+                            .font(.headline)
+                            .foregroundColor(selectedCurrency == "eur" ? .white : .blue)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(selectedCurrency == "eur" ? Color.blue : Color.gray.opacity(0.2))
+                            .cornerRadius(8)
+                    }
 
-                // Lista de criptomonedas
+                    Button(action: {
+                        selectedCurrency = "usd"
+                        viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
+                    }) {
+                        Text("USD")
+                            .font(.headline)
+                            .foregroundColor(selectedCurrency == "usd" ? .white : .blue)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(selectedCurrency == "usd" ? Color.blue : Color.gray.opacity(0.2))
+                            .cornerRadius(8)
+                    }
+                }
+                .padding(.horizontal)
+                
+                // 🔹 Botón para ver favoritos
+                Button(action: {
+                    showFavorites = true
+                }) {
+                    HStack {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                        Text("Ver Favoritos")
+                            .font(.headline)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(8)
+                }
+                .padding(.horizontal)
+                .padding(.top, 4)
+
+                // 🔹 Lista de criptomonedas
                 List(viewModel.cryptocurrencies) { crypto in
                     Button {
                         selectedCrypto = crypto
@@ -38,9 +80,6 @@ struct CryptoListView: View {
                 .onAppear {
                     viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
                 }
-                .onChange(of: selectedCurrency) {
-                    viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
-                }
             }
             .navigationTitle("Top Cryptos")
             .alert(item: $viewModel.errorMessage) { errorMessage in
@@ -50,12 +89,16 @@ struct CryptoListView: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
-            // Navegación a la Vista de Detalle
+            // 🔹 Navegación a la Vista de Detalle
             .sheet(isPresented: $showDetail) {
                 if let selectedCrypto = selectedCrypto {
                     CryptoDetailView(crypto: selectedCrypto)
                 }
             }
+            // 🔹 Navegación a la Vista de Favoritos
+            //.sheet(isPresented: $showFavorites) {
+                //FavoritesView()
+            //}
         }
     }
 }

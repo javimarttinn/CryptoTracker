@@ -13,6 +13,17 @@ struct CryptoDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var historicalPrices: [HistoricalPrice] = []
     @State private var isFavorite: Bool = false
+    @State private var isLoading: Bool = false
+    @State private var selectedDays: Int = 7 // Rango predeterminado: 7 días
+    // Opciones de Rango de Tiempo
+    private let dayOptions: [Int] = [1, 7, 30, 90, 365]
+    private let dayLabels: [Int: String] = [
+            1: "1 Día",
+            7: "7 Días",
+            30: "30 Días",
+            90: "90 Días",
+            365: "365 Días"
+        ]
 
     var body: some View {
         ScrollView {
@@ -95,27 +106,53 @@ struct CryptoDetailView: View {
                 
                 Divider()
                 
-                // 🔹 Gráfico de Precios Históricos
-                VStack(alignment: .leading) {
-                    Text("Gráfico de Precios Históricos")
-                        .font(.headline)
-                        .padding(.bottom, 4)
-                        .foregroundColor(.black)
-                    
-                    Chart(historicalPrices) {
-                        LineMark(
-                            x: .value("Fecha", $0.date),
-                            y: .value("Precio", $0.price)
-                        )
-                    }
-                    .frame(height: 200)
-                    .background(Color.gray.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .onAppear {
-                        loadHistoricalData()
-                    }
-                }
-                .padding(.horizontal)
+                // 🔹 Picker para Seleccionar el Rango de Tiempo
+                                VStack(alignment: .leading) {
+                                    Text("Rango de Tiempo")
+                                        .font(.headline)
+                                        .padding(.bottom, 4)
+                                        .padding(.horizontal)
+                                    
+                                    Picker("Selecciona Rango", selection: $selectedDays) {
+                                        ForEach(dayOptions, id: \.self) { day in
+                                            Text(dayLabels[day] ?? "\(day) Días").tag(day)
+                                        }
+                                    }
+                                    .pickerStyle(SegmentedPickerStyle())
+                                    .padding(.horizontal)
+                                    .onChange(of: selectedDays) {
+                                        loadHistoricalData()
+                                    }
+                                }
+                                
+                                Divider()
+                                
+                                // 🔹 Gráfico de Precios Históricos
+                                VStack(alignment: .leading) {
+                                    Text("Gráfico de Precios Históricos")
+                                        .font(.headline)
+                                        .padding(.bottom, 4)
+                                        .foregroundColor(.black)
+                                    
+                                    if isLoading {
+                                        ProgressView("Cargando datos históricos...")
+                                            .padding()
+                                    } else if !historicalPrices.isEmpty {
+                                        Chart(historicalPrices) {
+                                            LineMark(
+                                                x: .value("Fecha", $0.date),
+                                                y: .value("Precio", $0.price)
+                                            )
+                                        }
+                                        .frame(height: 200)
+                                        .background(Color.gray.opacity(0.1))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    } else {
+                                        Text("No hay datos históricos disponibles.")
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                                .padding(.horizontal)
                 
                 Divider()
                 
@@ -162,13 +199,18 @@ struct CryptoDetailView: View {
     
     // Datos ficticios para el gráfico
     func loadHistoricalData() {
-        historicalPrices = [
-            HistoricalPrice(date: "2024-12-01", price: 42000),
-            HistoricalPrice(date: "2024-12-02", price: 42500),
-            HistoricalPrice(date: "2024-12-03", price: 43000),
-            HistoricalPrice(date: "2024-12-04", price: 42800),
-            HistoricalPrice(date: "2024-12-05", price: 43200)
-        ]
+        isLoading = true
+        API.shared.fetchHistoricalPrices(for: crypto.id, vsCurrency: "usd", days: selectedDays) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                switch result {
+                case .success(let prices):
+                    historicalPrices = prices
+                case .failure(let error):
+                    print("Error: \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     func deleteCrypto() {

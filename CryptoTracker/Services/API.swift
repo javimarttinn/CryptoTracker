@@ -55,6 +55,8 @@ class API {
         }
         task.resume()
     }
+    
+    
     func fetchHistoricalPrices(for id: String, vsCurrency: String, days: Int, completion: @escaping (Result<[HistoricalPrice], Error>) -> Void) {
         let endpoint = "coins/\(id)/market_chart?vs_currency=\(vsCurrency)&days=\(days)&interval=daily"
         let urlString = "\(baseURL)\(endpoint)"
@@ -99,6 +101,43 @@ class API {
         }
         task.resume()
     }
+    
+    
+    func fetchFavoriteCryptocurrencies(ids: [String], vsCurrency: String, completion: @escaping (Result<[Cryptocurrency], Error>) -> Void) {
+        let idList = ids.joined(separator: ",")
+        let endpoint = "coins/markets?vs_currency=\(vsCurrency)&ids=\(idList)"
+        let urlString = "\(baseURL)\(endpoint)"
+        
+        guard let url = URL(string: urlString) else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(Private.coinGeckoAPIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let task = URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(APIError.noData))
+                return
+            }
+
+            do {
+                let cryptocurrencies = try JSONDecoder().decode([Cryptocurrency].self, from: data)
+                completion(.success(cryptocurrencies))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        task.resume()
+    }
+
 }
 
 enum APIError: Error {

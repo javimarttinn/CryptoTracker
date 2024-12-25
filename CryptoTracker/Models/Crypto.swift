@@ -15,6 +15,7 @@ struct Cryptocurrency: Identifiable, Decodable {
     let currentPrice: Double
     let marketCap: Double
     let priceChangePercentage24h: Double
+    
 
     
     enum CodingKeys: String, CodingKey {

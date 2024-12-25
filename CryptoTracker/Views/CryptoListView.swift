@@ -8,10 +8,11 @@
 import SwiftUI
 import SwiftData
 
-
 struct CryptoListView: View {
     @StateObject private var viewModel = CryptoListViewModel()
-    @State private var selectedCurrency = "usd"
+    @State private var selectedCurrency = "eur"
+    @State private var selectedCrypto: Cryptocurrency?// Guarda la criptomoneda seleccionada
+    @State private var showDetail = false // Controla la navegación a la vista de detalle
 
     var body: some View {
         NavigationView {
@@ -26,7 +27,12 @@ struct CryptoListView: View {
 
                 // Lista de criptomonedas
                 List(viewModel.cryptocurrencies) { crypto in
-                    CryptoRowView(crypto: crypto)
+                    Button {
+                        selectedCrypto = crypto
+                        showDetail = true
+                    } label: {
+                        CryptoRowView(crypto: crypto)
+                    }
                 }
                 .listStyle(PlainListStyle())
                 .onAppear {
@@ -36,13 +42,19 @@ struct CryptoListView: View {
                     viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
                 }
             }
-            .navigationTitle("Top 10 Cryptos")
+            .navigationTitle("Top Cryptos")
             .alert(item: $viewModel.errorMessage) { errorMessage in
                 Alert(
                     title: Text("Error"),
                     message: Text(errorMessage.message),
                     dismissButton: .default(Text("OK"))
                 )
+            }
+            // Navegación a la Vista de Detalle
+            .sheet(isPresented: $showDetail) {
+                if let selectedCrypto = selectedCrypto {
+                    CryptoDetailView(crypto: selectedCrypto)
+                }
             }
         }
     }

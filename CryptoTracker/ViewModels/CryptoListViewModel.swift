@@ -18,6 +18,8 @@ struct ErrorMessage: Identifiable {
 class CryptoListViewModel: ObservableObject {
     @Published var cryptocurrencies: [Cryptocurrency] = []
     @Published var errorMessage: ErrorMessage?
+    @Published var isDataLoaded = false
+    
 
     func fetchTopCryptocurrencies(vsCurrency: String) {
         API.shared.fetchTopCryptocurrencies(vsCurrency: vsCurrency) { [weak self] result in
@@ -25,8 +27,10 @@ class CryptoListViewModel: ObservableObject {
                 switch result {
                 case .success(let cryptos):
                     self?.cryptocurrencies = cryptos
+                    self?.isDataLoaded = true
                 case .failure(let error):
                     self?.errorMessage = ErrorMessage(message: error.localizedDescription)
+                    self?.isDataLoaded = true
                 }
             }
         }

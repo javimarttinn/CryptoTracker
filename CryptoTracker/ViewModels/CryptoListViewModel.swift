@@ -35,4 +35,22 @@ class CryptoListViewModel: ObservableObject {
             }
         }
     }
+    
+    @Published var searchResults: [Cryptocurrency] = []
+
+    func searchCryptocurrency(query: String) {
+        API.shared.searchCryptocurrency(query: query) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let cryptos):
+                    print("✅ Resultados recibidos: \(cryptos.map { $0.name })")
+                    self?.searchResults = cryptos
+                case .failure(let error):
+                    print("❌ Error en la búsqueda: \(error.localizedDescription)")
+                    self?.errorMessage = ErrorMessage(message: error.localizedDescription)
+                }
+            }
+        }
+    }
+
 }

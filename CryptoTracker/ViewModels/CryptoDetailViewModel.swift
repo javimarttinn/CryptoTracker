@@ -30,4 +30,5 @@ class CryptoDetailViewModel: ObservableObject {
             }
         }
     }
+    
 }

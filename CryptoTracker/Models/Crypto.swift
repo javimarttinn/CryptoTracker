@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import SwiftData
 
-struct Cryptocurrency: Identifiable, Decodable {
+struct Cryptocurrency: Identifiable, Codable {
     let id: String
     let symbol: String
     let name: String
@@ -15,6 +16,7 @@ struct Cryptocurrency: Identifiable, Decodable {
     let currentPrice: Double
     let marketCap: Double
     let priceChangePercentage24h: Double
+    var isFavorite: Bool = false
     
 
     

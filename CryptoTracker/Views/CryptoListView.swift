@@ -14,7 +14,7 @@ struct CryptoListView: View {
     @State private var selectedCrypto: Cryptocurrency?
     @State private var showDetail = false
     @State private var showFavorites = false // Controla la navegación a la vista de favoritos
-    
+    @State private var showSearch = false // Abre la ventana de búsqueda
 
     var body: some View {
         NavigationView {
@@ -48,7 +48,7 @@ struct CryptoListView: View {
                     }
                 }
                 .padding(.horizontal)
-                
+
                 // 🔹 Botón para ver favoritos
                 Button(action: {
                     showFavorites = true
@@ -76,12 +76,24 @@ struct CryptoListView: View {
                         CryptoRowView(crypto: crypto)
                     }
                 }
-                .listStyle(PlainListStyle())
                 .onAppear {
                     viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
                 }
             }
             .navigationTitle("Top Cryptos")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showSearch = true
+                    }) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.title2)
+                    }
+                }
+            }
+            .sheet(isPresented: $showSearch) {
+                CryptoSearchView(viewModel: viewModel)
+            }
             .alert(item: $viewModel.errorMessage) { errorMessage in
                 Alert(
                     title: Text("Error"),
@@ -89,16 +101,11 @@ struct CryptoListView: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
-            // 🔹 Navegación a la Vista de Detalle
             .sheet(isPresented: $showDetail) {
                 if let selectedCrypto = selectedCrypto {
                     CryptoDetailView(crypto: selectedCrypto)
                 }
             }
-            // 🔹 Navegación a la Vista de Favoritos
-            //.sheet(isPresented: $showFavorites) {
-                //FavoritesView()
-            //}
         }
     }
 }

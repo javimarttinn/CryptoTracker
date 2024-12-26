@@ -15,20 +15,20 @@ struct CryptoDetailView: View {
     @State private var isFavorite: Bool = false
     @State private var isLoading: Bool = false
     @State private var selectedDays: Int = 7 // Rango predeterminado: 7 días
+    
     // Opciones de Rango de Tiempo
     private let dayOptions: [Int] = [1, 7, 30, 90, 365]
     private let dayLabels: [Int: String] = [
-            1: "1 Día",
-            7: "7 Días",
-            30: "30 Días",
-            90: "90 Días",
-            365: "365 Días"
-        ]
-
+        1: "1 Día",
+        7: "7 Días",
+        30: "30 Días",
+        90: "90 Días",
+        365: "365 Días"
+    ]
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                
                 // 🔹 Encabezado
                 HStack {
                     Button(action: {
@@ -41,18 +41,18 @@ struct CryptoDetailView: View {
                     
                     Spacer()
                     
-                    HStack () {
+                    HStack {
                         // Imagen del Logo de la Criptomoneda
-                           AsyncImage(url: URL(string: crypto.image)) { image in
-                               image
-                                   .resizable()
-                                   .frame(width: 40, height: 40)
-                                   .clipShape(Circle())
-                                   .shadow(radius: 4)
-                           } placeholder: {
-                               ProgressView()
-                                   .frame(width: 40, height: 40)
-                           }
+                        AsyncImage(url: URL(string: crypto.image)) { image in
+                            image
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                                .shadow(radius: 4)
+                        } placeholder: {
+                            ProgressView()
+                                .frame(width: 40, height: 40)
+                        }
                         
                         Text(crypto.symbol.uppercased())
                             .font(.title2)
@@ -63,20 +63,18 @@ struct CryptoDetailView: View {
                     
                     Spacer()
                     
-                    HStack(spacing: 16) {
+                    Button(action: {
                         
-                        Button(action: {
-                            isFavorite.toggle()
-                        }) {
-                            Image(systemName: isFavorite ? "star.fill" : "star")
-                                .foregroundColor(isFavorite ? .yellow : .black)
-                        }
-                        
+                    }) {
+                        Image(systemName: isFavorite ? "star.fill" : "star")
+                            .foregroundColor(isFavorite ? .yellow : .black)
                     }
                 }
                 .padding()
                 .background(Color.white)
                 .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
+               
+                
                 
                 // 🔹 Nombre y Precio
                 VStack(alignment: .leading, spacing: 8) {
@@ -107,52 +105,52 @@ struct CryptoDetailView: View {
                 Divider()
                 
                 // 🔹 Picker para Seleccionar el Rango de Tiempo
-                                VStack(alignment: .leading) {
-                                    Text("Rango de Tiempo")
-                                        .font(.headline)
-                                        .padding(.bottom, 4)
-                                        .padding(.horizontal)
-                                    
-                                    Picker("Selecciona Rango", selection: $selectedDays) {
-                                        ForEach(dayOptions, id: \.self) { day in
-                                            Text(dayLabels[day] ?? "\(day) Días").tag(day)
-                                        }
-                                    }
-                                    .pickerStyle(SegmentedPickerStyle())
-                                    .padding(.horizontal)
-                                    .onChange(of: selectedDays) {
-                                        loadHistoricalData()
-                                    }
-                                }
-                                
-                                Divider()
-                                
-                                // 🔹 Gráfico de Precios Históricos
-                                VStack(alignment: .leading) {
-                                    Text("Gráfico de Precios Históricos")
-                                        .font(.headline)
-                                        .padding(.bottom, 4)
-                                        .foregroundColor(.black)
-                                    
-                                    if isLoading {
-                                        ProgressView("Cargando datos históricos...")
-                                            .padding()
-                                    } else if !historicalPrices.isEmpty {
-                                        Chart(historicalPrices) {
-                                            LineMark(
-                                                x: .value("Fecha", $0.date),
-                                                y: .value("Precio", $0.price)
-                                            )
-                                        }
-                                        .frame(height: 200)
-                                        .background(Color.gray.opacity(0.1))
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    } else {
-                                        Text("No hay datos históricos disponibles.")
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                                .padding(.horizontal)
+                VStack(alignment: .leading) {
+                    Text("Rango de Tiempo")
+                        .font(.headline)
+                        .padding(.bottom, 4)
+                        .padding(.horizontal)
+                    
+                    Picker("Selecciona Rango", selection: $selectedDays) {
+                        ForEach(dayOptions, id: \.self) { day in
+                            Text(dayLabels[day] ?? "\(day) Días").tag(day)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+                    .onChange(of: selectedDays) {
+                        loadHistoricalData()
+                    }
+                }
+                
+                Divider()
+                
+                // 🔹 Gráfico de Precios Históricos
+                VStack(alignment: .leading) {
+                    Text("Gráfico de Precios Históricos")
+                        .font(.headline)
+                        .padding(.bottom, 4)
+                        .foregroundColor(.black)
+                    
+                    if isLoading {
+                        ProgressView("Cargando datos históricos...")
+                            .padding()
+                    } else if !historicalPrices.isEmpty {
+                        Chart(historicalPrices) {
+                            LineMark(
+                                x: .value("Fecha", $0.date),
+                                y: .value("Precio", $0.price)
+                            )
+                        }
+                        .frame(height: 200)
+                        .background(Color.gray.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    } else {
+                        Text("No hay datos históricos disponibles.")
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding(.horizontal)
                 
                 Divider()
                 
@@ -169,7 +167,7 @@ struct CryptoDetailView: View {
                         FeatureRow(title: "Suministro Circulante", value: "19,500,000 BTC")
                     }
                     .padding()
-                    .background(Color.gray.opacity(0.1)) // Fondo gris claro
+                    .background(Color.gray.opacity(0.1))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
                 .padding(.horizontal)
@@ -193,8 +191,8 @@ struct CryptoDetailView: View {
                 }
                 .padding(.horizontal)
             }
+            .background(Color.white.edgesIgnoringSafeArea(.all))
         }
-        .background(Color.white.edgesIgnoringSafeArea(.all)) // Fondo blanco en toda la vista
     }
     
     // Datos ficticios para el gráfico
@@ -234,6 +232,7 @@ struct FeatureRow: View {
         }
     }
 }
+
 
 // Datos Históricos
 struct HistoricalPrice: Identifiable {

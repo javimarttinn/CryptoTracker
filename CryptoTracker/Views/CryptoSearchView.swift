@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CryptoSearchView: View {
     @ObservedObject var viewModel: CryptoListViewModel
@@ -13,6 +14,7 @@ struct CryptoSearchView: View {
     @State private var searchText = ""
     @State private var selectedCrypto: Cryptocurrency?
     @State private var showAlert = false
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationView {
@@ -80,7 +82,7 @@ struct CryptoSearchView: View {
                     message: Text("¿Quieres añadir \(selectedCrypto?.name ?? "esta criptomoneda") a la lista principal?"),
                     primaryButton: .default(Text("Sí")) {
                         if let crypto = selectedCrypto {
-                            viewModel.cryptocurrencies.append(crypto)
+                            viewModel.addCryptocurrency(crypto, modelContext: modelContext)
                             presentationMode.wrappedValue.dismiss()
                         }
                     },
@@ -95,10 +97,3 @@ struct CryptoSearchView: View {
 #Preview {
     CryptoSearchView(viewModel: CryptoListViewModel())
 }
-//
-//  CrypotSearchView.swift
-//  CryptoTracker
-//
-//  Created by Javier Martin on 26/12/24.
-//
-

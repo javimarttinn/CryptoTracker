@@ -15,6 +15,7 @@ struct CryptoListView: View {
     @State private var showDetail = false
     @State private var showFavorites = false // Controla la navegación a la vista de favoritos
     @State private var showSearch = false // Abre la ventana de búsqueda
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationView {
@@ -24,6 +25,7 @@ struct CryptoListView: View {
                     Button(action: {
                         selectedCurrency = "eur"
                         viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
+                        viewModel.loadManualCryptocurrencies(modelContext: modelContext)
                     }) {
                         Text("EUR")
                             .font(.headline)
@@ -37,6 +39,7 @@ struct CryptoListView: View {
                     Button(action: {
                         selectedCurrency = "usd"
                         viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
+                        viewModel.loadManualCryptocurrencies(modelContext: modelContext)
                     }) {
                         Text("USD")
                             .font(.headline)
@@ -68,20 +71,29 @@ struct CryptoListView: View {
                 .padding(.top, 4)
 
                 // 🔹 Lista de criptomonedas
-                List(viewModel.cryptocurrencies) { crypto in
-                    Button {
-                        selectedCrypto = crypto
-                        showDetail = true
-                    } label: {
-                        CryptoRowView(crypto: crypto)
+                List {
+                    ForEach(viewModel.cryptocurrencies) { crypto in
+                        Button {
+                            selectedCrypto = crypto
+                            showDetail = true
+                        } label: {
+                            CryptoRowView(crypto: crypto)
+                        }
+                    }
+                    .onDelete { indexSet in
+                        viewModel.removeCryptocurrency(at: indexSet, modelContext: modelContext)
                     }
                 }
                 .onAppear {
                     viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
+                    viewModel.loadManualCryptocurrencies(modelContext: modelContext)
                 }
             }
             .navigationTitle("Top Cryptos")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                        EditButton()
+                    }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         showSearch = true

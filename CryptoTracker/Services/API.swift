@@ -148,6 +148,52 @@ class API {
         }
         task.resume()
     }
+    
+    
+    func fetchCryptocurrencyDetails(id: String, vsCurrency: String, completion: @escaping (Result<Cryptocurrency, Error>) -> Void) {
+        let endpoint = "coins/markets"
+        let urlString = "\(baseURL)\(endpoint)?vs_currency=\(vsCurrency)&ids=\(id)"
+        
+        guard let url = URL(string: urlString) else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(APIError.noData))
+                return
+            }
+            
+            // 🔍 Depurar JSON
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📊 JSON recibido para \(id): \(jsonString)")
+            }
+            
+            do {
+                // Decodificar como un array de Cryptocurrency
+                let cryptocurrencies = try JSONDecoder().decode([Cryptocurrency].self, from: data)
+                if let cryptocurrency = cryptocurrencies.first {
+                    completion(.success(cryptocurrency))
+                } else {
+                    completion(.failure(APIError.noData))
+                }
+            } catch {
+                print("❌ Error al decodificar JSON para \(id): \(error.localizedDescription)")
+                completion(.failure(error))
+            }
+        }
+        task.resume()
+    }
+
+
+
+    
 
     // Estructura de búsqueda para decodificar el JSON
     struct SearchResult: Codable {
@@ -167,5 +213,7 @@ class API {
 enum APIError: Error {
     case invalidURL
     case noData
+    case decodingError
+    case rateLimitExceeded // ⚠️ Nuevo tipo de error
 }
 

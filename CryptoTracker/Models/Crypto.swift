@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import SwiftData
 
-struct Cryptocurrency: Identifiable, Codable {
+
+struct Cryptocurrency: Identifiable, Codable, Hashable {
     let id: String
     let symbol: String
     let name: String

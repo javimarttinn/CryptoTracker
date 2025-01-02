@@ -24,8 +24,7 @@ struct CryptoListView: View {
                 HStack(spacing: 16) {
                     Button(action: {
                         selectedCurrency = "eur"
-                        viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
-                        viewModel.loadManualCryptocurrencies(modelContext: modelContext)
+                        viewModel.switchCurrency(to: selectedCurrency)
                     }) {
                         Text("EUR")
                             .font(.headline)
@@ -38,8 +37,7 @@ struct CryptoListView: View {
 
                     Button(action: {
                         selectedCurrency = "usd"
-                        viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
-                        viewModel.loadManualCryptocurrencies(modelContext: modelContext)
+                        viewModel.switchCurrency(to: selectedCurrency)
                     }) {
                         Text("USD")
                             .font(.headline)
@@ -85,15 +83,14 @@ struct CryptoListView: View {
                     }
                 }
                 .onAppear {
-                    viewModel.fetchTopCryptocurrencies(vsCurrency: selectedCurrency)
-                    viewModel.loadManualCryptocurrencies(modelContext: modelContext)
+                    viewModel.loadInitialData(modelContext: modelContext)
                 }
             }
             .navigationTitle("Top Cryptos")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                        EditButton()
-                    }
+                    EditButton()
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         showSearch = true

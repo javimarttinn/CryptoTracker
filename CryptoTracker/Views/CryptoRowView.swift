@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CryptoRowView: View {
     let crypto: Cryptocurrency
+    let currencySymbol: String // Añadido para mostrar el símbolo de la divisa
 
     var body: some View {
         HStack {
@@ -35,7 +36,7 @@ struct CryptoRowView: View {
 
             // Precio actual y variación
             VStack(alignment: .trailing) {
-                Text("$\(crypto.currentPrice, specifier: "%.2f")")
+                Text("\(currencySymbol)\(crypto.currentPrice, specifier: "%.2f")")
                     .font(.headline)
                 Text("\(crypto.priceChangePercentage24h >= 0 ? "+" : "")\(crypto.priceChangePercentage24h, specifier: "%.2f")%")
                     .font(.subheadline)
@@ -47,15 +48,32 @@ struct CryptoRowView: View {
 }
 
 #Preview {
-    CryptoRowView(crypto: Cryptocurrency(
-        id: "1",
-        symbol: "btc",
-        name: "Bitcoin",
-        image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
-        currentPrice: 42900.55,
-        marketCap: 800000000000,
-        priceChangePercentage24h: +2.5
-    ))
-    
+    VStack {
+        CryptoRowView(
+            crypto: Cryptocurrency(
+                id: "1",
+                symbol: "btc",
+                name: "Bitcoin",
+                image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+                currentPrice: 42900.55,
+                marketCap: 800000000000,
+                priceChangePercentage24h: +2.5
+            ),
+            currencySymbol: "$" // Simulación para dólares
+        )
+        
+        CryptoRowView(
+            crypto: Cryptocurrency(
+                id: "1",
+                symbol: "btc",
+                name: "Bitcoin",
+                image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+                currentPrice: 42900.55,
+                marketCap: 800000000000,
+                priceChangePercentage24h: +2.5
+            ),
+            currencySymbol: "€" // Simulación para euros
+        )
+    }
     .padding()
 }

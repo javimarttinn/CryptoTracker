@@ -11,6 +11,7 @@ struct FavoritesView: View {
     @ObservedObject var viewModel: CryptoListViewModel
     @State private var selectedCrypto: Cryptocurrency?
     @State private var showDetail = false
+    @State private var selectedCurrency = "eur"
 
     var body: some View {
         NavigationView {
@@ -20,7 +21,7 @@ struct FavoritesView: View {
                         selectedCrypto = crypto
                         showDetail = true
                     } label: {
-                        CryptoRowView(crypto: crypto)
+                        CryptoRowView(crypto: crypto, currencySymbol: selectedCurrency == "eur" ? "€" : "$")
                     }
                 }
             }

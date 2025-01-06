@@ -78,7 +78,7 @@ struct CryptoListView: View {
                             selectedCrypto = crypto
                             showDetail = true
                         } label: {
-                            CryptoRowView(crypto: crypto)
+                            CryptoRowView(crypto: crypto, currencySymbol: selectedCurrency == "eur" ? "€" : "$")
                         }
                     }
                     .onDelete { indexSet in

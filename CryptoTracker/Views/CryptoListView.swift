@@ -67,6 +67,9 @@ struct CryptoListView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 4)
+                .sheet(isPresented: $showFavorites) {
+                    FavoritesView(viewModel: viewModel)
+                }
 
                 // 🔹 Lista de criptomonedas
                 List {

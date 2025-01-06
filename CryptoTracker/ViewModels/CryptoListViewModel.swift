@@ -28,6 +28,8 @@ class CryptoListViewModel: ObservableObject {
     
     @Published var errorMessage: ErrorMessage?
     @Published var isDataLoaded = false
+    @Published var favoriteCryptocurrencies: [Cryptocurrency] = []
+
     
     private var selectedCurrency: String = "eur"
     
@@ -168,45 +170,64 @@ class CryptoListViewModel: ObservableObject {
             }
             
             // Añadir a ambas listas manuales
+            let group = DispatchGroup()
+            
+            group.enter()
             API.shared.fetchCryptocurrencyDetails(id: crypto.id, vsCurrency: "eur") { result in
-                if case .success(let cryptoEUR) = result {
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    if case .success(let cryptoEUR) = result {
                         self.manualCryptocurrenciesEUR.append(cryptoEUR)
                     }
+                    group.leave()
                 }
             }
             
+            group.enter()
             API.shared.fetchCryptocurrencyDetails(id: crypto.id, vsCurrency: "usd") { result in
-                if case .success(let cryptoUSD) = result {
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    if case .success(let cryptoUSD) = result {
                         self.manualCryptocurrenciesUSD.append(cryptoUSD)
                     }
+                    group.leave()
                 }
             }
             
-            switchCurrency(to: selectedCurrency)
+            // Refrescar la vista después de añadir la criptomoneda
+            group.notify(queue: .main) {
+                print("🔄 Actualizando la vista principal después de añadir una criptomoneda manualmente.")
+                self.switchCurrency(to: self.selectedCurrency)
+            }
+        } else {
+            print("⚠️ La criptomoneda ya está en la lista.")
         }
     }
+
     
-    // MARK: - Eliminar criptomonedas
+    // Eliminar una criptomoneda por su índice
     func removeCryptocurrency(at indexSet: IndexSet, modelContext: ModelContext) {
         for index in indexSet {
             let crypto = cryptocurrencies[index]
             
-            if manualCryptocurrenciesEUR.contains(where: { $0.id == crypto.id }) {
-                removeCryptocurrencyFromSwiftData(id: crypto.id, modelContext: modelContext)
-            }
+            // Eliminar de SwiftData
+            removeCryptocurrencyFromSwiftData(id: crypto.id, modelContext: modelContext)
             
-            if selectedCurrency == "eur" {
-                cryptocurrenciesEUR.removeAll { $0.id == crypto.id }
-                manualCryptocurrenciesEUR.removeAll { $0.id == crypto.id }
-            } else {
-                cryptocurrenciesUSD.removeAll { $0.id == crypto.id }
-                manualCryptocurrenciesUSD.removeAll { $0.id == crypto.id }
-            }
+            // Eliminar de los arrays de memoria (EUR y USD)
+            cryptocurrenciesEUR.removeAll { $0.id == crypto.id }
+            cryptocurrenciesUSD.removeAll { $0.id == crypto.id }
+            manualCryptocurrenciesEUR.removeAll { $0.id == crypto.id }
+            manualCryptocurrenciesUSD.removeAll { $0.id == crypto.id }
         }
-        switchCurrency(to: selectedCurrency)
+        
+        // Actualizar la lista visible
+        DispatchQueue.main.async {
+            self.switchCurrency(to: self.selectedCurrency)
+        }
     }
+
+
+
+
+
     
     
     
@@ -227,5 +248,66 @@ class CryptoListViewModel: ObservableObject {
             print("❌ Error al eliminar criptomoneda de SwiftData: \(error.localizedDescription)")
         }
     }
+    
+    
+    // MARK: - Favoritos: Añadir y Eliminar
+    func toggleFavorite(for crypto: Cryptocurrency, modelContext: ModelContext) {
+        let fetchDescriptor = FetchDescriptor<CryptoFavorite>(predicate: #Predicate { $0.id == crypto.id })
+        do {
+            if let existingFavorite = try modelContext.fetch(fetchDescriptor).first {
+                // Si ya está en favoritos, eliminarlo
+                modelContext.delete(existingFavorite)
+                print("❌ Eliminado de favoritos: \(crypto.name)")
+            } else {
+                // Si no está en favoritos, añadirlo
+                let newFavorite = CryptoFavorite(id: crypto.id)
+                modelContext.insert(newFavorite)
+                print("⭐ Añadido a favoritos: \(crypto.name)")
+            }
+            try modelContext.save()
+            loadFavoriteCryptocurrencies(modelContext: modelContext)
+        } catch {
+            errorMessage = ErrorMessage(message: "Error al modificar favoritos: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Cargar Favoritos al Iniciar
+    func loadFavoriteCryptocurrencies(modelContext: ModelContext) {
+        let fetchDescriptor = FetchDescriptor<CryptoFavorite>()
+        do {
+            let favoriteIDs = try modelContext.fetch(fetchDescriptor).map { $0.id }
+            let group = DispatchGroup()
+            var loadedFavorites: [Cryptocurrency] = []
+            
+            for id in favoriteIDs {
+                group.enter()
+                API.shared.fetchCryptocurrencyDetails(id: id, vsCurrency: selectedCurrency) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let crypto):
+                            loadedFavorites.append(crypto)
+                        case .failure(let error):
+                            self.errorMessage = ErrorMessage(message: "Error al cargar favorito \(id): \(error.localizedDescription)")
+                        }
+                        group.leave()
+                    }
+                }
+            }
+            
+            group.notify(queue: .main) {
+                self.favoriteCryptocurrencies = loadedFavorites
+            }
+        } catch {
+            errorMessage = ErrorMessage(message: "Error al cargar favoritos: \(error.localizedDescription)")
+        }
+    }
+
+
+    // MARK: - Actualizar Favoritos
+    func updateFavorites() {
+        favoriteCryptocurrencies = (cryptocurrenciesEUR + cryptocurrenciesUSD)
+            .filter { $0.isFavorite }
+    }
+
 
 }

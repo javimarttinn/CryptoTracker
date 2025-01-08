@@ -12,6 +12,8 @@ struct FavoritesView: View {
     @State private var selectedCrypto: Cryptocurrency?
     @State private var showDetail = false
     @State private var selectedCurrency = "eur"
+    @StateObject private var detailViewModel = CryptoDetailViewModel()
+
 
     var body: some View {
         NavigationView {
@@ -28,7 +30,7 @@ struct FavoritesView: View {
             .navigationTitle("Favoritos")
             .sheet(isPresented: $showDetail) {
                 if let selectedCrypto = selectedCrypto {
-                    CryptoDetailView(crypto: selectedCrypto)
+                    CryptoDetailView(crypto: selectedCrypto, currencySymbol: selectedCurrency == "eur" ? "€" : "$", viewModel: detailViewModel)
                 }
             }
         }

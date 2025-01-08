@@ -4,31 +4,29 @@
 //
 //  Created by Javier Martin on 23/12/24.
 //
-
 import SwiftUI
 import Charts
 
 struct CryptoDetailView: View {
     let crypto: Cryptocurrency
+    let currencySymbol: String
+    @StateObject var viewModel: CryptoDetailViewModel
     @Environment(\.presentationMode) var presentationMode
-    @State private var historicalPrices: [HistoricalPrice] = []
     @State private var isFavorite: Bool = false
-    @State private var isLoading: Bool = false
     @State private var selectedDays: Int = 7 // Rango predeterminado: 7 días
-    
+
     // Opciones de Rango de Tiempo
-    private let dayOptions: [Int] = [1, 7, 30, 90, 365]
+    private let dayOptions: [Int] = [30, 90, 365]
     private let dayLabels: [Int: String] = [
-        1: "1 Día",
-        7: "7 Días",
         30: "30 Días",
         90: "90 Días",
         365: "365 Días"
     ]
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+                
                 // 🔹 Encabezado
                 HStack {
                     Button(action: {
@@ -42,29 +40,25 @@ struct CryptoDetailView: View {
                     Spacer()
                     
                     HStack {
-                        // Imagen del Logo de la Criptomoneda
                         AsyncImage(url: URL(string: crypto.image)) { image in
-                            image
-                                .resizable()
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
-                                .shadow(radius: 4)
+                            image.resizable()
                         } placeholder: {
                             ProgressView()
-                                .frame(width: 40, height: 40)
                         }
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                        .shadow(radius: 4)
                         
                         Text(crypto.symbol.uppercased())
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.black)
                     }
-                    .padding(.horizontal)
                     
                     Spacer()
                     
                     Button(action: {
-                        
+                        isFavorite.toggle()
                     }) {
                         Image(systemName: isFavorite ? "star.fill" : "star")
                             .foregroundColor(isFavorite ? .yellow : .black)
@@ -73,8 +67,6 @@ struct CryptoDetailView: View {
                 .padding()
                 .background(Color.white)
                 .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
-               
-                
                 
                 // 🔹 Nombre y Precio
                 VStack(alignment: .leading, spacing: 8) {
@@ -84,7 +76,7 @@ struct CryptoDetailView: View {
                         .foregroundColor(.black)
                     
                     HStack {
-                        Text(String(format: "%.2f €", crypto.currentPrice))
+                        Text(String(format: "%.2f \(currencySymbol)", crypto.currentPrice))
                             .font(.system(size: 32, weight: .bold))
                             .foregroundColor(.black)
                         
@@ -111,47 +103,85 @@ struct CryptoDetailView: View {
                         .padding(.bottom, 4)
                         .padding(.horizontal)
                     
-                    Picker("Selecciona Rango", selection: $selectedDays) {
+                    Picker("Selecciona Rango", selection: $viewModel.selectedDays) {
                         ForEach(dayOptions, id: \.self) { day in
                             Text(dayLabels[day] ?? "\(day) Días").tag(day)
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .padding(.horizontal)
-                    .onChange(of: selectedDays) {
-                        loadHistoricalData()
+                    .onChange(of: viewModel.selectedDays) {
+                        viewModel.fetchHistoricalPrices(
+                            for: crypto.id,
+                            vsCurrency: currencySymbol == "€" ? "eur" : "usd"
+                        )
                     }
                 }
                 
                 Divider()
                 
-                // 🔹 Gráfico de Precios Históricos
+
                 VStack(alignment: .leading) {
                     Text("Gráfico de Precios Históricos")
                         .font(.headline)
                         .padding(.bottom, 4)
                         .foregroundColor(.black)
                     
-                    if isLoading {
+                    if viewModel.isLoading {
                         ProgressView("Cargando datos históricos...")
                             .padding()
-                    } else if !historicalPrices.isEmpty {
-                        Chart(historicalPrices) {
-                            LineMark(
-                                x: .value("Fecha", $0.date),
-                                y: .value("Precio", $0.price)
-                            )
+                    } else if !viewModel.historicalPrices.isEmpty {
+                        Chart {
+                            ForEach(viewModel.historicalPrices) { price in
+                                LineMark(
+                                    x: .value("Fecha", price.date),
+                                    y: .value("Precio", price.price)
+                                )
+                                .foregroundStyle(.blue)
+                                .lineStyle(StrokeStyle(lineWidth: 2))
+                            }
                         }
-                        .frame(height: 200)
-                        .background(Color.gray.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .chartXAxis {
+                            AxisMarks(position: .bottom) { value in
+                                if let dateValue = value.as(String.self) {
+                                    // Mostrar solo la fecha inicial y final
+                                    if dateValue == viewModel.historicalPrices.first?.date {
+                                        AxisValueLabel(dateValue)
+                                            .font(.caption)
+                                            .foregroundStyle(.gray)
+                                    } else if dateValue == viewModel.historicalPrices.last?.date {
+                                        AxisValueLabel(dateValue)
+                                            .font(.caption)
+                                            .foregroundStyle(.gray)
+                                    }
+                                }
+                            }
+                        }
+                        .chartYAxis {
+                            AxisMarks(position: .leading) { value in
+                                AxisGridLine()
+                                AxisValueLabel()
+                                    .font(.caption)
+                                    .foregroundStyle(.gray)
+                            }
+                        }
+                        .chartYScale(domain: 0...((viewModel.historicalPrices.map { $0.price }.max() ?? 10) * 1.1))
+                        .frame(height: 300)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white)
+                                .shadow(radius: 5)
+                        )
+                        .padding()
                     } else {
                         Text("No hay datos históricos disponibles.")
                             .foregroundColor(.gray)
+                            .padding()
                     }
                 }
                 .padding(.horizontal)
-                
+
+
                 Divider()
                 
                 // 🔹 Características Adicionales
@@ -162,9 +192,13 @@ struct CryptoDetailView: View {
                         .foregroundColor(.black)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        FeatureRow(title: "Capitalización de Mercado", value: String(format: "%.0f €", crypto.marketCap))
-                        FeatureRow(title: "Volumen de Mercado (24h)", value: "€500,000,000")
-                        FeatureRow(title: "Suministro Circulante", value: "19,500,000 BTC")
+                        FeatureRow(title: "Capitalización de Mercado", value: String(format: "%.0f \(currencySymbol)", crypto.marketCap))
+                        FeatureRow(title: "Volumen de Mercado (24h)", value: String(format: "%.0f \(currencySymbol)", crypto.totalVolume))
+                        FeatureRow(title: "Suministro Circulante", value: String(format: "%.0f", crypto.circulatingSupply))
+                        FeatureRow(title: "Suministro Total", value: String(format: "%.0f", crypto.totalSupply ?? 0))
+                        FeatureRow(title: "Suministro Máximo", value: String(format: "%.0f", crypto.maxSupply ?? 0))
+                        FeatureRow(title: "ATH (Máximo Histórico)", value: String(format: "%.2f \(currencySymbol)", crypto.ath ?? 0))
+                        FeatureRow(title: "ATL (Mínimo Histórico)", value: String(format: "%.2f \(currencySymbol)", crypto.atl ?? 0))
                     }
                     .padding()
                     .background(Color.gray.opacity(0.1))
@@ -177,7 +211,7 @@ struct CryptoDetailView: View {
                 // 🔹 Botones de Acción
                 HStack {
                     Button("Eliminar Criptomoneda") {
-                        deleteCrypto()
+                        print("\(crypto.name) eliminada.")
                     }
                     .foregroundColor(.red)
                     .buttonStyle(.bordered)
@@ -191,28 +225,13 @@ struct CryptoDetailView: View {
                 }
                 .padding(.horizontal)
             }
-            .background(Color.white.edgesIgnoringSafeArea(.all))
         }
-    }
-    
-    // Datos ficticios para el gráfico
-    func loadHistoricalData() {
-        isLoading = true
-        API.shared.fetchHistoricalPrices(for: crypto.id, vsCurrency: "usd", days: selectedDays) { result in
-            DispatchQueue.main.async {
-                isLoading = false
-                switch result {
-                case .success(let prices):
-                    historicalPrices = prices
-                case .failure(let error):
-                    print("Error: \(error.localizedDescription)")
+        .onAppear {
+            if viewModel.crypto == nil {
+                    viewModel.crypto = crypto
                 }
-            }
+            //viewModel.fetchHistoricalPrices(for: crypto.id, vsCurrency: currencySymbol)
         }
-    }
-    
-    func deleteCrypto() {
-        print("\(crypto.name) eliminada.")
     }
 }
 
@@ -242,15 +261,39 @@ struct HistoricalPrice: Identifiable {
 }
 
 #Preview {
-    CryptoDetailView(crypto: Cryptocurrency(
-        id: "1",
-        symbol: "BTC",
-        name: "Bitcoin",
-        image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
-        currentPrice: 94409.27,
-        marketCap: 800000000000,
-        priceChangePercentage24h: -0.21
-    ))
+    CryptoDetailView(
+        crypto: Cryptocurrency(
+            id: "polkadot",
+            symbol: "DOT",
+            name: "Polkadot",
+            image: "https://coin-images.coingecko.com/coins/images/12171/large/polkadot.png?1696512008",
+            currentPrice: 6.81,
+            marketCap: 10366185876,
+            marketCapRank: 21,
+            fullyDilutedValuation: 10366185876,
+            totalVolume: 466441859,
+            high24h: 7.38,
+            low24h: 6.72,
+            priceChange24h: -0.4714,
+            priceChangePercentage24h: -6.47,
+            marketCapChange24h: -725260299.67,
+            marketCapChangePercentage24h: -6.54,
+            circulatingSupply: 1522267060,
+            totalSupply: 1522267060,
+            maxSupply: nil,
+            ath: 54.98,
+            athChangePercentage: -87.56,
+            athDate: "2021-11-04T14:10:09.301Z",
+            atl: 2.7,
+            atlChangePercentage: 153.45,
+            atlDate: "2020-08-20T05:48:11.359Z",
+            roi: nil,
+            lastUpdated: "2025-01-08T16:16:52.307Z",
+            isFavorite: false
+        ),
+        currencySymbol: "€",
+        viewModel: CryptoDetailViewModel()
+    )
 }
 
 

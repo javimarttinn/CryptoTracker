@@ -110,6 +110,7 @@ class API {
         let endpoint = "search"
         let urlString = "\(baseURL)\(endpoint)?query=\(query)"
         
+        // Verificar si la URL es válida
         guard let url = URL(string: urlString) else {
             completion(.failure(APIError.invalidURL))
             return
@@ -117,6 +118,7 @@ class API {
         
         let request = URLRequest(url: url)
         
+        // Realizar la solicitud
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
@@ -136,18 +138,43 @@ class API {
                         symbol: coin.symbol,
                         name: coin.name,
                         image: coin.large,
-                        currentPrice: 0.0, // No se obtiene directamente aquí
+                        currentPrice: 0.0,
                         marketCap: 0.0,
-                        priceChangePercentage24h: 0.0
+                        marketCapRank: 0,
+                        fullyDilutedValuation: 0.0,
+                        totalVolume: 0.0,
+                        high24h: 0.0,
+                        low24h: 0.0,
+                        priceChange24h: 0.0,
+                        priceChangePercentage24h: 0.0,
+                        marketCapChange24h: 0.0,
+                        marketCapChangePercentage24h: 0.0,
+                        circulatingSupply: 0.0,
+                        totalSupply: 0.0,
+                        maxSupply: nil,
+                        ath: 0.0,
+                        athChangePercentage: 0.0,
+                        athDate: "",
+                        atl: 0.0,
+                        atlChangePercentage: 0.0,
+                        atlDate: "",
+                        roi: nil,
+                        lastUpdated: "",
+                        isFavorite: false
                     )
+
                 }
                 completion(.success(cryptocurrencies))
             } catch {
-                completion(.failure(error))
+                print("❌ Error al decodificar JSON: \(error.localizedDescription)")
+                completion(.failure(APIError.decodingError))
             }
+
         }
         task.resume()
     }
+
+
     
     
     func fetchCryptocurrencyDetails(id: String, vsCurrency: String, completion: @escaping (Result<Cryptocurrency, Error>) -> Void) {

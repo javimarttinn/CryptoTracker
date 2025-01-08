@@ -15,6 +15,12 @@ class CryptoDetailViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var selectedDays: Int = 7 // Valor por defecto
+    @Published var crypto: Cryptocurrency?
+    
+    
+    init(crypto: Cryptocurrency? = nil) {
+           self.crypto = crypto
+       }
 
     func fetchHistoricalPrices(for id: String, vsCurrency: String) {
         isLoading = true
@@ -30,5 +36,10 @@ class CryptoDetailViewModel: ObservableObject {
             }
         }
     }
+
+    
+    
+    
+    
     
 }

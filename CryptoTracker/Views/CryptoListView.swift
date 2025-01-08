@@ -16,6 +16,8 @@ struct CryptoListView: View {
     @State private var showFavorites = false // Controla la navegación a la vista de favoritos
     @State private var showSearch = false // Abre la ventana de búsqueda
     @Environment(\.modelContext) private var modelContext
+    @StateObject private var detailViewModel = CryptoDetailViewModel()
+
 
     var body: some View {
         NavigationView {
@@ -89,7 +91,7 @@ struct CryptoListView: View {
                     viewModel.loadInitialData(modelContext: modelContext)
                 }
             }
-            .navigationTitle("Top Cryptos")
+            .navigationTitle("Crypto Tracker")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     EditButton()
@@ -115,7 +117,11 @@ struct CryptoListView: View {
             }
             .sheet(isPresented: $showDetail) {
                 if let selectedCrypto = selectedCrypto {
-                    CryptoDetailView(crypto: selectedCrypto)
+                    CryptoDetailView(
+                                crypto: selectedCrypto,
+                                currencySymbol: selectedCurrency == "eur" ? "€" : "$",
+                                viewModel: CryptoDetailViewModel(crypto: selectedCrypto)
+                            )
                 }
             }
         }

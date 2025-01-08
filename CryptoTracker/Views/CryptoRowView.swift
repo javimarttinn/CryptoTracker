@@ -49,30 +49,74 @@ struct CryptoRowView: View {
 
 #Preview {
     VStack {
+        // 🔹 Vista en Dólares ($)
         CryptoRowView(
             crypto: Cryptocurrency(
                 id: "1",
-                symbol: "btc",
+                symbol: "BTC",
                 name: "Bitcoin",
                 image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
                 currentPrice: 42900.55,
                 marketCap: 800000000000,
-                priceChangePercentage24h: +2.5
+                marketCapRank: 1,
+                fullyDilutedValuation: 850000000000,
+                totalVolume: 35000000000,
+                high24h: 43500.00,
+                low24h: 42000.00,
+                priceChange24h: 150.50,
+                priceChangePercentage24h: 2.5,
+                marketCapChange24h: 2000000000,
+                marketCapChangePercentage24h: 0.5,
+                circulatingSupply: 19000000,
+                totalSupply: 21000000,
+                maxSupply: 21000000,
+                ath: 69000.00,
+                athChangePercentage: -37.8,
+                athDate: "2021-11-10T14:24:11.849Z",
+                atl: 65.53,
+                atlChangePercentage: 65345.2,
+                atlDate: "2013-07-06T00:00:00.000Z",
+                roi: nil,
+                lastUpdated: "2025-01-08T16:16:52.307Z",
+                isFavorite: false
             ),
-            currencySymbol: "$" // Simulación para dólares
+            currencySymbol: "$"
         )
         
+        Divider().padding(.vertical)
+        
+        // 🔹 Vista en Euros (€)
         CryptoRowView(
             crypto: Cryptocurrency(
                 id: "1",
-                symbol: "btc",
+                symbol: "BTC",
                 name: "Bitcoin",
                 image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
                 currentPrice: 42900.55,
                 marketCap: 800000000000,
-                priceChangePercentage24h: +2.5
+                marketCapRank: 1,
+                fullyDilutedValuation: 850000000000,
+                totalVolume: 35000000000,
+                high24h: 43500.00,
+                low24h: 42000.00,
+                priceChange24h: 150.50,
+                priceChangePercentage24h: 2.5,
+                marketCapChange24h: 2000000000,
+                marketCapChangePercentage24h: 0.5,
+                circulatingSupply: 19000000,
+                totalSupply: 21000000,
+                maxSupply: 21000000,
+                ath: 69000.00,
+                athChangePercentage: -37.8,
+                athDate: "2021-11-10T14:24:11.849Z",
+                atl: 65.53,
+                atlChangePercentage: 65345.2,
+                atlDate: "2013-07-06T00:00:00.000Z",
+                roi: nil,
+                lastUpdated: "2025-01-08T16:16:52.307Z",
+                isFavorite: false
             ),
-            currencySymbol: "€" // Simulación para euros
+            currencySymbol: "€"
         )
     }
     .padding()

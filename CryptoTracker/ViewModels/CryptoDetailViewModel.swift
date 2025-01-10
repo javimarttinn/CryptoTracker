@@ -16,6 +16,8 @@ class CryptoDetailViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var selectedDays: Int = 7 // Valor por defecto
     @Published var crypto: Cryptocurrency?
+    @Published var favoriteCryptocurrencies: [Cryptocurrency] = []
+
     
     
     init(crypto: Cryptocurrency? = nil) {

@@ -20,42 +20,41 @@ class API {
     
     
     func fetchTopCryptocurrencies(vsCurrency: String, completion: @escaping (Result<[Cryptocurrency], Error>) -> Void) {
-        let endpoint = "coins/markets"
-        let urlString = "\(baseURL)\(endpoint)?vs_currency=\(vsCurrency)&order=market_cap_desc&per_page=10&page=1"
-        
-         //comprobar si url valida
-        guard let url = URL(string: urlString) else {
-            completion(.failure(APIError.invalidURL))
-            return
-        }
+           let endpoint = "coins/markets"
+           let urlString = "\(baseURL)\(endpoint)?vs_currency=\(vsCurrency)&order=market_cap_desc&per_page=5&page=1"
+           
+            //comprobar si url valida
+           guard let url = URL(string: urlString) else {
+               completion(.failure(APIError.invalidURL))
+               return
+           }
 
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(Private.coinGeckoAPIKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+           var request = URLRequest(url: url)
+           request.setValue("Bearer \(Private.coinGeckoAPIKey)", forHTTPHeaderField: "Authorization")
+           request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        //realizar solicitud
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
+           //realizar solicitud
+           let task = URLSession.shared.dataTask(with: request) { data, response, error in
+               if let error = error {
+                   completion(.failure(error))
+                   return
+               }
 
-            guard let data = data else {
-                completion(.failure(APIError.noData))
-                return
-            }
+               guard let data = data else {
+                   completion(.failure(APIError.noData))
+                   return
+               }
 
-            //decodificar datos
-            do {
-                let cryptocurrencies = try JSONDecoder().decode([Cryptocurrency].self, from: data)
-                completion(.success(cryptocurrencies))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-        task.resume()
-    }
-    
+               //decodificar datos
+               do {
+                   let cryptocurrencies = try JSONDecoder().decode([Cryptocurrency].self, from: data)
+                   completion(.success(cryptocurrencies))
+               } catch {
+                   completion(.failure(error))
+               }
+           }
+           task.resume()
+       }
     
     func fetchHistoricalPrices(for id: String, vsCurrency: String, days: Int, completion: @escaping (Result<[HistoricalPrice], Error>) -> Void) {
         let endpoint = "coins/\(id)/market_chart?vs_currency=\(vsCurrency)&days=\(days)&interval=daily"
@@ -177,10 +176,20 @@ class API {
 
     
     
-    func fetchCryptocurrencyDetails(id: String, vsCurrency: String, completion: @escaping (Result<Cryptocurrency, Error>) -> Void) {
+    func fetchCryptocurrencyDetails(ids: [String], vsCurrency: String, completion: @escaping (Result<[Cryptocurrency], Error>) -> Void) {
+        let joinedIDs = ids.joined(separator: ",")
         let endpoint = "coins/markets"
-        let urlString = "\(baseURL)\(endpoint)?vs_currency=\(vsCurrency)&ids=\(id)"
+        let urlString = "\(baseURL)\(endpoint)?vs_currency=\(vsCurrency)&ids=\(joinedIDs)"
         
+        
+        //si hace la solicitud vacia carga las 100 primeras
+        guard !ids.isEmpty else {
+            print("⚠️ No se enviaron IDs a la API.")
+            completion(.success([]))
+            return
+        }
+        
+
         guard let url = URL(string: urlString) else {
             completion(.failure(APIError.invalidURL))
             return
@@ -197,26 +206,16 @@ class API {
                 return
             }
             
-            // 🔍 Depurar JSON
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("📊 JSON recibido para \(id): \(jsonString)")
-            }
-            
             do {
-                // Decodificar como un array de Cryptocurrency
                 let cryptocurrencies = try JSONDecoder().decode([Cryptocurrency].self, from: data)
-                if let cryptocurrency = cryptocurrencies.first {
-                    completion(.success(cryptocurrency))
-                } else {
-                    completion(.failure(APIError.noData))
-                }
+                completion(.success(cryptocurrencies))
             } catch {
-                print("❌ Error al decodificar JSON para \(id): \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
         task.resume()
     }
+
 
 
 
@@ -243,4 +242,3 @@ enum APIError: Error {
     case decodingError
     case rateLimitExceeded // ⚠️ Nuevo tipo de error
 }
-

@@ -13,6 +13,7 @@ struct CryptoTrackerApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             CryptoID.self,
+            CryptoFavorite.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

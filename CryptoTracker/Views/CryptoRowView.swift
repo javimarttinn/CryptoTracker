@@ -9,11 +9,11 @@ import SwiftUI
 
 struct CryptoRowView: View {
     let crypto: Cryptocurrency
-    let currencySymbol: String // Añadido para mostrar el símbolo de la divisa
+    let currencySymbol: String
 
     var body: some View {
         HStack {
-            // Imagen de la criptomoneda
+            // imagen de la criptomoneda
             AsyncImage(url: URL(string: crypto.image)) { image in
                 image.resizable()
             } placeholder: {
@@ -23,7 +23,7 @@ struct CryptoRowView: View {
             .clipShape(Circle())
             .shadow(radius: 4)
 
-            // Información de la criptomoneda
+            // unformación de la criptomoneda
             VStack(alignment: .leading) {
                 Text(crypto.name)
                     .font(.headline)
@@ -34,7 +34,7 @@ struct CryptoRowView: View {
 
             Spacer()
 
-            // Precio actual y variación
+            // precio actual y variación
             VStack(alignment: .trailing) {
                 Text("\(currencySymbol)\(crypto.currentPrice, specifier: "%.2f")")
                     .font(.headline)
@@ -49,7 +49,7 @@ struct CryptoRowView: View {
 
 #Preview {
     VStack {
-        // 🔹 Vista en Dólares ($)
+        //dls
         CryptoRowView(
             crypto: Cryptocurrency(
                 id: "1",
@@ -85,7 +85,7 @@ struct CryptoRowView: View {
         
         Divider().padding(.vertical)
         
-        // 🔹 Vista en Euros (€)
+        // euros
         CryptoRowView(
             crypto: Cryptocurrency(
                 id: "1",

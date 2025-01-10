@@ -13,12 +13,6 @@ class API {
 
     private init() {}
 
-    // Obtiene el Top 10 de criptomonedas ordenadas por capitalización de mercado
-    // - Parameters:
-    //   - vsCurrency: Moneda de referencia (ej. "usd", "eur")
-    //   - completion: Callback con resultado exitoso o error
-    
-    
     func fetchTopCryptocurrencies(vsCurrency: String, completion: @escaping (Result<[Cryptocurrency], Error>) -> Void) {
            let endpoint = "coins/markets"
            let urlString = "\(baseURL)\(endpoint)?vs_currency=\(vsCurrency)&order=market_cap_desc&per_page=5&page=1"
@@ -109,7 +103,7 @@ class API {
         let endpoint = "search"
         let urlString = "\(baseURL)\(endpoint)?query=\(query)"
         
-        // Verificar si la URL es válida
+        // verificar si la URL es válidza
         guard let url = URL(string: urlString) else {
             completion(.failure(APIError.invalidURL))
             return
@@ -117,7 +111,7 @@ class API {
         
         let request = URLRequest(url: url)
         
-        // Realizar la solicitud
+        // realizar la solicitud
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
@@ -165,7 +159,7 @@ class API {
                 }
                 completion(.success(cryptocurrencies))
             } catch {
-                print("❌ Error al decodificar JSON: \(error.localizedDescription)")
+                print("Error al decodificar JSON: \(error.localizedDescription)")
                 completion(.failure(APIError.decodingError))
             }
 
@@ -184,7 +178,7 @@ class API {
         
         //si hace la solicitud vacia carga las 100 primeras
         guard !ids.isEmpty else {
-            print("⚠️ No se enviaron IDs a la API.")
+            print("No se enviaron IDs a la API.")
             completion(.success([]))
             return
         }

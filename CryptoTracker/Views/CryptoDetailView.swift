@@ -13,11 +13,11 @@ struct CryptoDetailView: View {
     @StateObject var viewModel: CryptoDetailViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var isFavorite: Bool = false
-    @State private var selectedDays: Int = 30 // Rango predeterminado: 30 días
-    @State private var isLoading: Bool = true // Estado de carga
+    @State private var selectedDays: Int = 30
+    @State private var isLoading: Bool = true
     @Environment(\.modelContext) private var modelContext
 
-    // Opciones de Rango de Tiempo
+  
     private let dayOptions: [Int] = [7, 30, 90, 365]
     private let dayLabels: [Int: String] = [
         7: "7 Días",
@@ -29,7 +29,7 @@ struct CryptoDetailView: View {
     var body: some View {
         Group {
             if isLoading {
-                // 🔹 Mostrar indicador de carga mientras se inicializan los datos
+               
                 VStack {
                     ProgressView("Cargando datos...")
                         .padding()
@@ -38,7 +38,7 @@ struct CryptoDetailView: View {
             } else {
                 ScrollView {
                     VStack(spacing: 20) {
-                        // 🔹 Encabezado
+                        //  Encabezado
                         HStack {
                             Button(action: {
                                 presentationMode.wrappedValue.dismiss()
@@ -67,19 +67,19 @@ struct CryptoDetailView: View {
                             }
 
                             Spacer()
-
+                            //estrella añadir/eliminar favorito
                             Button(action: {
-                                // Alternar favorito
+                                
                                 if isFavorite {
                                     favoritesViewModel.removeFavorite(for: crypto, modelContext: modelContext)
                                 } else {
                                     favoritesViewModel.addFavorite(for: crypto, modelContext: modelContext)
                                 }
 
-                                // Actualizar el estado local
+                                
                                 isFavorite.toggle()
                             }) {
-                                // Mostrar la estrella según el estado actual
+                                // mostrar la estrella según el estado actual
                                 Image(systemName: isFavorite ? "star.fill" : "star")
                                     .foregroundColor(isFavorite ? .yellow : .black)
                             }
@@ -88,7 +88,7 @@ struct CryptoDetailView: View {
                         .background(Color.white)
                         .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
 
-                        // 🔹 Nombre y Precio
+                        // Nombre y Precio
                         VStack(alignment: .leading, spacing: 8) {
                             Text(crypto.name)
                                 .font(.title)
@@ -116,7 +116,7 @@ struct CryptoDetailView: View {
 
                         Divider()
 
-                        // 🔹 Picker para Seleccionar el Rango de Tiempo
+                        // Picker para seleccionar el rango de ttiempo
                         VStack(alignment: .leading) {
                             Text("Rango de Tiempo")
                                 .font(.headline)
@@ -140,7 +140,7 @@ struct CryptoDetailView: View {
 
                         Divider()
 
-                        // 🔹 Gráfico de Precios Históricos
+                        // grafico de Precios Históricos
                         VStack(alignment: .leading) {
                             Text("Gráfico de Precios Históricos")
                                 .font(.headline)
@@ -179,7 +179,7 @@ struct CryptoDetailView: View {
 
                         Divider()
 
-                        // 🔹 Características Adicionales
+                        //  características adicionales
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Características")
                                 .font(.headline)
@@ -207,9 +207,9 @@ struct CryptoDetailView: View {
             }
         }
         .onAppear {
-            // Inicializar datos y simular carga
+            
             isLoading = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { // Simula un tiempo de carga
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { // para poder mostrarlo correctamente 
                 if viewModel.crypto == nil {
                     viewModel.crypto = crypto
                 }
@@ -221,7 +221,7 @@ struct CryptoDetailView: View {
     }
 }
 
-// 🔹 Vista Auxiliar para Características
+
 struct FeatureRow: View {
     let title: String
     let value: String
@@ -239,7 +239,7 @@ struct FeatureRow: View {
 }
 
 
-// Datos Históricos
+
 struct HistoricalPrice: Identifiable {
     let id = UUID()
     let date: String

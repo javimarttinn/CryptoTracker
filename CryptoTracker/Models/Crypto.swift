@@ -26,13 +26,13 @@ struct Cryptocurrency: Identifiable, Codable, Hashable {
     let circulatingSupply: Double // Suministro circulante
     let totalSupply: Double?      // Suministro total
     let maxSupply: Double?        // Suministro máximo
-    let ath: Double?              // Precio más alto de la historia (All-Time High)
+    let ath: Double?              // Precio más alto de la historia
     let athChangePercentage: Double? // Cambio de porcentaje respecto al ATH
     let athDate: String?          // Fecha del ATH
-    let atl: Double?              // Precio más bajo de la historia (All-Time Low)
+    let atl: Double?              // Precio más bajo de la historia
     let atlChangePercentage: Double? // Cambio de porcentaje respecto al ATL
     let atlDate: String?          // Fecha del ATL
-    let roi: ROI?                 // Retorno de la inversión (si está disponible)
+    let roi: ROI?                 // Retorno de la inversión
     let lastUpdated: String?      // Última actualización
     var isFavorite: Bool = false  // Para marcar como favorito
     
@@ -63,7 +63,7 @@ struct Cryptocurrency: Identifiable, Codable, Hashable {
     }
 }
 
-// Estructura para el ROI (Retorno de la inversión)
+
 struct ROI: Codable, Hashable {
     let times: Double?
     let currency: String?

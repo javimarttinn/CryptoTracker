@@ -22,16 +22,16 @@ class FavoritesViewModel: ObservableObject {
                 // Eliminar favorito
                 modelContext.delete(existingFavorite)
                 favoriteCryptocurrencies.removeAll { $0.id == crypto.id }
-                print("❌ Eliminado de favoritos: \(crypto.name)")
+                print("Eliminado de favoritos: \(crypto.name)")
             } else {
                 // Añadir favorito desde el array `cryptocurrencies`
                 if let cryptoToAdd = cryptocurrencies.first(where: { $0.id == crypto.id }) {
                     let newFavorite = CryptoFavorite(id: crypto.id)
                     modelContext.insert(newFavorite)
                     favoriteCryptocurrencies.append(cryptoToAdd)
-                    print("⭐ Añadido a favoritos: \(cryptoToAdd.name)")
+                    print("Añadido a favoritos: \(cryptoToAdd.name)")
                 } else {
-                    print("⚠️ Criptomoneda no encontrada en el array de criptomonedas.")
+                    print("Criptomoneda no encontrada en el array de criptomonedas.")
                 }
             }
             try modelContext.save()
@@ -41,14 +41,14 @@ class FavoritesViewModel: ObservableObject {
     }
 
 
-    // MARK: - Cargar Favoritos al Iniciar
+    // argar fvs al Iniciar
     func loadFavoriteCryptocurrencies(modelContext: ModelContext) {
         let fetchDescriptor = FetchDescriptor<CryptoFavorite>()
         do {
-            // Obtener los IDs favoritos
+           
             let favoriteIDs = try modelContext.fetch(fetchDescriptor).map { $0.id }
             
-            // Si no hay favoritos, simplemente limpia la lista
+         
             guard !favoriteIDs.isEmpty else {
                 DispatchQueue.main.async {
                     self.favoriteCryptocurrencies = []
@@ -56,7 +56,7 @@ class FavoritesViewModel: ObservableObject {
                 return
             }
             
-            // Realizar una única solicitud con todos los IDs favoritos
+            // realizar una única solicitud con todos los IDs favoritos (prueba)
             API.shared.fetchCryptocurrencyDetails(ids: favoriteIDs, vsCurrency: selectedCurrency) { result in
                 DispatchQueue.main.async {
                     switch result {
@@ -71,7 +71,7 @@ class FavoritesViewModel: ObservableObject {
             errorMessage = ErrorMessage(message: "Error al cargar favoritos: \(error.localizedDescription)")
         }
     }
-    // MARK: - Cargar Favoritos al Abrir la Vista
+    // cargar favoritos al Abrir la Vista
     func refreshFavorites(from cryptocurrencies: [Cryptocurrency], modelContext: ModelContext) {
         let fetchDescriptor = FetchDescriptor<CryptoFavorite>()
         do {
@@ -88,12 +88,12 @@ class FavoritesViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Verificar si es Favorito
+    // verificar si es Favorito
     func isFavorite(_ id: String) -> Bool {
         favoriteCryptocurrencies.contains { $0.id == id }
     }
 
-    // MARK: - Eliminar Favorito
+
     func removeFavorite(for crypto: Cryptocurrency, modelContext: ModelContext) {
         let fetchDescriptor = FetchDescriptor<CryptoFavorite>(predicate: #Predicate { $0.id == crypto.id })
         do {
@@ -101,14 +101,14 @@ class FavoritesViewModel: ObservableObject {
                 modelContext.delete(existingFavorite)
                 try modelContext.save()
                 favoriteCryptocurrencies.removeAll { $0.id == crypto.id }
-                print("❌ Eliminado de favoritos: \(crypto.name)")
+                print("Eliminado de favoritos: \(crypto.name)")
             }
         } catch {
             errorMessage = ErrorMessage(message: "Error al eliminar de favoritos: \(error.localizedDescription)")
         }
     }
 
-    // MARK: - Añadir Favorito
+
     func addFavorite(for crypto: Cryptocurrency, modelContext: ModelContext) {
         let newFavorite = CryptoFavorite(id: crypto.id)
         modelContext.insert(newFavorite)
@@ -117,7 +117,7 @@ class FavoritesViewModel: ObservableObject {
             if !favoriteCryptocurrencies.contains(where: { $0.id == crypto.id }) {
                 favoriteCryptocurrencies.append(crypto)
             }
-            print("⭐ Añadido a favoritos: \(crypto.name)")
+            print("Añadido a favoritos: \(crypto.name)")
         } catch {
             errorMessage = ErrorMessage(message: "Error al añadir a favoritos: \(error.localizedDescription)")
         }

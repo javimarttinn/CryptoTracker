@@ -19,12 +19,12 @@ struct CryptoSearchView: View {
     var body: some View {
         NavigationView {
             VStack {
-                // 🔍 Barra de búsqueda
+                // barra busqueda
                 HStack {
                     TextField("Buscar criptomoneda...", text: $searchText, onCommit: {
                         if !searchText.isEmpty {
                             viewModel.searchCryptocurrency(query: searchText)
-                            print("🔍 Buscando: \(searchText)")
+                            print("Buscando: \(searchText)")
                         }
                     })
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -33,7 +33,7 @@ struct CryptoSearchView: View {
                     Button(action: {
                         if !searchText.isEmpty {
                             viewModel.searchCryptocurrency(query: searchText)
-                            print("🔍 Botón de búsqueda presionado: \(searchText)")
+                            print("Botón de búsqueda presionado: \(searchText)")
                         }
                     }) {
                         Image(systemName: "magnifyingglass")
@@ -42,7 +42,7 @@ struct CryptoSearchView: View {
                     .padding(.trailing)
                 }
 
-                // 🔄 Resultados de búsqueda
+                // resultados de busqueda
                 List(viewModel.searchResults) { crypto in
                     Button {
                         selectedCrypto = crypto

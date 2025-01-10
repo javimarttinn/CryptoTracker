@@ -13,8 +13,8 @@ struct CryptoListView: View {
     @State private var selectedCurrency = "eur"
     @State private var selectedCrypto: Cryptocurrency?
     @State private var showDetail = false
-    @State private var showFavorites = false // Controla la navegación a la vista de favoritos
-    @State private var showSearch = false // Abre la ventana de búsqueda
+    @State private var showFavorites = false
+    @State private var showSearch = false
     @Environment(\.modelContext) private var modelContext
     @StateObject private var detailViewModel = CryptoDetailViewModel()
     @StateObject var favoritesViewModel = FavoritesViewModel()
@@ -30,11 +30,11 @@ struct CryptoListView: View {
                         viewModel.switchCurrency(to: selectedCurrency)
                     }) {
                         Text("EUR")
-                            .font(.subheadline) // Fuente más pequeña
+                            .font(.subheadline)
                             .foregroundColor(selectedCurrency == "eur" ? .white : .blue)
                             .padding(.vertical, 4)
                             .padding(.horizontal, 12)
-                            .background(selectedCurrency == "eur" ? Color.blue : Color.gray.opacity(0.2))
+                            .background(selectedCurrency == "eur" ? Color.blue : Color.white)
                             .clipShape(Capsule())
                             .shadow(color: selectedCurrency == "eur" ? .blue.opacity(0.3) : .clear, radius: 2, x: 0, y: 1)
                     }
@@ -44,25 +44,24 @@ struct CryptoListView: View {
                         viewModel.switchCurrency(to: selectedCurrency)
                     }) {
                         Text("USD")
-                            .font(.subheadline) // Fuente más pequeña
+                            .font(.subheadline) 
                             .foregroundColor(selectedCurrency == "usd" ? .white : .blue)
                             .padding(.vertical, 4)
                             .padding(.horizontal, 12)
-                            .background(selectedCurrency == "usd" ? Color.blue : Color.gray.opacity(0.2))
+                            .background(selectedCurrency == "usd" ? Color.blue : Color.white)
                             .clipShape(Capsule())
                             .shadow(color: selectedCurrency == "usd" ? .blue.opacity(0.3) : .clear, radius: 2, x: 0, y: 1)
                     }
                 }
                 .padding(6)
-                .background(Color.gray.opacity(0.1)) // Fondo gris claro para el selector
-                .clipShape(RoundedRectangle(cornerRadius: 8)) // Bordes redondeados más pequeños
-                .shadow(color: .gray.opacity(0.1), radius: 3, x: 0, y: 1)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
                     
                     Divider()
                         .padding(.vertical, 4)
                     
-                    // 🔹 Botón para ver favoritos
+                    // Botón para ver favoritos
                     Button(action: {
                         showFavorites = true
                     }) {
@@ -87,7 +86,7 @@ struct CryptoListView: View {
                 
                 .background(Color.white.edgesIgnoringSafeArea(.top))
 
-                // 🔹 Lista de criptomonedas
+                // Lista de criptomonedas
                 List {
                     ForEach(viewModel.cryptocurrencies) { crypto in
                         Button {

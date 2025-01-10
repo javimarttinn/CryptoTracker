@@ -15,7 +15,7 @@ struct FavoritesView: View {
         NavigationView {
             Group {
                 if viewModel.favoriteCryptocurrencies.isEmpty {
-                    // Mostrar mensaje si no hay favoritos
+                   
                     VStack {
                         Text("No tienes criptomonedas en favoritos.")
                             .font(.headline)
@@ -27,7 +27,7 @@ struct FavoritesView: View {
                             .foregroundColor(.gray.opacity(0.7))
                     }
                 } else {
-                    // Mostrar lista de favoritos
+                    // Mostrar lista favs
                     List(viewModel.favoriteCryptocurrencies) { crypto in
                         NavigationLink(
                             destination: CryptoDetailView(

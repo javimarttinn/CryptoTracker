@@ -14,7 +14,7 @@ class CryptoDetailViewModel: ObservableObject {
     @Published var historicalPrices: [HistoricalPrice] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    @Published var selectedDays: Int = 7 // Valor por defecto
+    @Published var selectedDays: Int = 7 
     @Published var crypto: Cryptocurrency?
     @Published var favoriteCryptocurrencies: [Cryptocurrency] = []
 

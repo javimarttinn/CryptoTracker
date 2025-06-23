@@ -215,8 +215,7 @@ enum APIError: Error {
 - [ ] Notificaciones push para alertas de precios
 - [ ] Modo oscuro/claro
 - [ ] Widget para pantalla de inicio
-- [ ] Soporte para watchOS
-- [ ] Análisis técnico avanzado
+
 
 ## 🐛 Problemas Conocidos
 
